@@ -1,4 +1,3 @@
-
 const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
@@ -23,13 +22,20 @@ app.get('/api/proxy', async (req, res) => {
         'X-City-ID': '5fd372b622305471d9bf45b2',
         'X-Timezone': 'GMT+08:00',
         'X-Mytracker-ID': '6d88c290-064b-4e15-aa4d-f725d9d6530a',
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6ImhVN0JRMGdOUzllR0c5WXU5bFF0WmcifQ...'
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImtpZCI6...'
       }
     });
-    const data = await apiRes.json();
-    res.json(data);
+
+    const text = await apiRes.text();
+    try {
+      const data = JSON.parse(text);
+      res.json(data);
+    } catch (e) {
+      res.status(500).json({ error: 'Ошибка при запросе к API', details: text });
+    }
+
   } catch (err) {
-    res.status(500).json({ error: 'Ошибка при запросе к API', details: err.message });
+    res.status(500).json({ error: 'Ошибка соединения с API', details: err.message });
   }
 });
 
