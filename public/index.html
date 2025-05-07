@@ -1,0 +1,23 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vkusno Interface</title>
+</head>
+<body style="font-family: sans-serif; padding: 2rem;">
+  <h1>🚀 <strong>Vkusno Interface</strong></h1>
+  <p>Нажми кнопку, чтобы отправить тестовый запрос в API.</p>
+  <button onclick="sendRequest()">Отправить запрос</button>
+  <pre id="response"></pre>
+
+  <script>
+    async function sendRequest() {
+      const res = await fetch('/api/proxy');
+      const data = await res.json();
+      document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
