@@ -1,95 +1,150 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Вкусно — и точка</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vkusno Interface</title>
   <style>
     body {
-      font-family: system-ui, sans-serif;
-      background: #fafafa;
+      font-family: sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background-color: #f5f5f5;
     }
-
+    header {
+      background-color: #2f4f2f;
+      color: white;
+      padding: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .container {
+      padding: 1rem;
+    }
     .card {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      max-width: 500px;
-      margin: auto;
-      padding: 16px;
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
     }
-
-    .card img {
-      width: 100%;
-      border-radius: 12px;
-      margin-bottom: 16px;
+    .card:hover {
+      background: #f9f9f9;
     }
-
-    .card h1 {
-      font-size: 20px;
-      margin: 0 0 8px;
+    .details {
+      max-width: 60%;
     }
-
-    .card h2 {
-      font-size: 16px;
-      color: #888;
-      margin: 0 0 12px;
+    .price {
+      background: orange;
+      border-radius: 50%;
+      color: white;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      font-size: 1.2rem;
     }
-
-    .card p {
-      font-size: 14px;
-      line-height: 1.4;
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
     }
-
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      padding: 2rem;
+      max-width: 90%;
+      text-align: center;
+    }
+    .modal img {
+      max-width: 150px;
+      margin-bottom: 1rem;
+    }
     .btn {
-      display: block;
-      margin-top: 20px;
-      background: #ff0044;
+      margin-top: 1rem;
+      background: orange;
       color: white;
       border: none;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 16px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
       cursor: pointer;
-      text-align: center;
     }
   </style>
 </head>
 <body>
+  <header>Твои награды</header>
+  <div class="container" id="promotions"></div>
 
-<div class="card" id="offer">
-  <p>Загрузка...</p>
-</div>
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modalContent">
+      <!-- контент будет динамически вставляться -->
+    </div>
+  </div>
 
-<script>
-  async function fetchData() {
-    try {
-      const res = await fetch('https://nn.eadig.ru/webhook/vkusno');
+  <script>
+    const API_URL = '/api/promotions';
+    const container = document.getElementById('promotions');
+    const modal = document.getElementById('modal');
+    const modalContent = document.getElementById('modalContent');
+
+    async function loadPromotions() {
+      const res = await fetch(API_URL);
       const data = await res.json();
 
-      const container = document.getElementById('offer');
+      const promo = Array.isArray(data) ? data[0] : data;
 
-      const image = data.images?.l;
-      const title = data.title;
-      const subtitle = data.subtitle;
-      const text = data.text;
-
-      container.innerHTML = `
-        <img src="${image}" alt="Акция">
-        <h1>${title}</h1>
-        <h2>${subtitle}</h2>
-        <p>${text.replace(/\\r\\n/g, '<br>')}</p>
-        <button class="btn">Использовать</button>
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="details">
+          <h3>${promo.title}</h3>
+          <p>${promo.subtitle}</p>
+          <small>${promo.availabilityMessage}</small>
+        </div>
+        <div>
+          <div class="price">129₽</div>
+        </div>
       `;
-    } catch (e) {
-      document.getElementById('offer').innerHTML = `<p>Ошибка загрузки: ${e.message}</p>`;
+      card.onclick = () => showDetails(promo);
+      container.appendChild(card);
     }
-  }
 
-  fetchData();
-</script>
+    function showDetails(promo) {
+      modalContent.innerHTML = `
+        <h2>${promo.title}</h2>
+        <p>${promo.text}</p>
+        <img src="${promo.images?.l}" alt="product" />
+        <button class="btn" onclick="showQR()">Активировать</button>
+      `;
+      modal.style.display = 'flex';
+    }
 
+    function showQR() {
+      modalContent.innerHTML = `
+        <h2>Поднеси QR-код к сканеру</h2>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?data=Акция129&size=200x200" alt="QR Code" />
+        <p style="font-size: 1.5rem; margin-top: 1rem;">MF2J6Q7</p>
+        <p>Коды обновляются каждые 7 минут, поэтому скриншоты работать не будут</p>
+        <button class="btn" onclick="closeModal()">Закрыть</button>
+      `;
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    window.onclick = e => {
+      if (e.target === modal) closeModal();
+    };
+
+    loadPromotions();
+  </script>
 </body>
 </html>
