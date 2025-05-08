@@ -2,32 +2,94 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Vkusno Interface</title>
+  <title>Вкусно — и точка</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { padding: 10px 20px; }
-    pre { background: #eee; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #fafafa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      max-width: 500px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #888;
+      margin: 0 0 12px;
+    }
+
+    .card p {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .btn {
+      display: block;
+      margin-top: 20px;
+      background: #ff0044;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>🚀 Vkusno Interface</h1>
-  <p>Нажми кнопку, чтобы получить данные из n8n.</p>
-  <button onclick="sendRequest()">Отправить запрос</button>
-  <pre id="result">...</pre>
 
-  <script>
-    async function sendRequest() {
-      const resultBox = document.getElementById('result');
-      resultBox.textContent = 'Загрузка...';
+<div class="card" id="offer">
+  <p>Загрузка...</p>
+</div>
 
-      try {
-        const response = await fetch('https://nn.eadig.ru/webhook/vkusno');
-        const data = await response.json();
-        resultBox.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        resultBox.textContent = 'Ошибка: ' + error.message;
-      }
+<script>
+  async function fetchData() {
+    try {
+      const res = await fetch('https://nn.eadig.ru/webhook/vkusno');
+      const data = await res.json();
+
+      const container = document.getElementById('offer');
+
+      const image = data.images?.l;
+      const title = data.title;
+      const subtitle = data.subtitle;
+      const text = data.text;
+
+      container.innerHTML = `
+        <img src="${image}" alt="Акция">
+        <h1>${title}</h1>
+        <h2>${subtitle}</h2>
+        <p>${text.replace(/\\r\\n/g, '<br>')}</p>
+        <button class="btn">Использовать</button>
+      `;
+    } catch (e) {
+      document.getElementById('offer').innerHTML = `<p>Ошибка загрузки: ${e.message}</p>`;
     }
-  </script>
+  }
+
+  fetchData();
+</script>
+
 </body>
 </html>
